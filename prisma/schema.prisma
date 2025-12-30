@@ -14,30 +14,37 @@ datasource db {
 }
 
 model RefreshToken {
-  id      BigInt   @id @default(autoincrement())
-  user_id BigInt
+  id      BigInt @id @default(autoincrement())
+  user_id BigInt @unique
   token   String
-  user    User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("refresh_token")
 }
 
 model CouponIssues {
-  id         BigInt @id @default(autoincrement())
-  issue_code String @db.Uuid
+  id         BigInt  @id @default(autoincrement())
+  issue_code String  @db.Uuid
   is_used    Boolean
   user_id    BigInt
   coupon_id  BigInt
-  user       User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  coupon     Coupon @relation(fields: [coupon_id], references: [id], onDelete: Cascade)
+  user       User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  coupon     Coupon  @relation(fields: [coupon_id], references: [id], onDelete: Cascade)
 
+  @@unique([coupon_id, user_id])
+  @@index([coupon_id])
+  @@index([user_id])
   @@map("coupon_issues")
 }
 
 model Coupon {
-  id              BigInt        @id @default(autoincrement())
+  id              BigInt         @id @default(autoincrement())
+  name            String
   total_quantity  Int
-  issued_quantity Int
+  issued_quantity Int            @default(0)
+  status          String         @default("OPEN")
+  starts_at       DateTime?
+  ends_at         DateTime?
   issues          CouponIssues[]
 
   @@map("coupons")
@@ -45,7 +52,7 @@ model Coupon {
 
 model User {
   id           BigInt         @id @default(autoincrement())
-  email        String
+  email        String         @unique
   password     String
   refreshToken RefreshToken[]
   couponIssues CouponIssues[]
