@@ -4,8 +4,6 @@ import { UpdateCouponDto } from './dto/update-coupon.dto';
 
 @Injectable()
 export class CouponService {
-  constructor(private readonly) {}
-    
   create(createCouponDto: CreateCouponDto) {
     return 'This action adds a new coupon';
   }
