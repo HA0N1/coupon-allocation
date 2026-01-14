@@ -10,6 +10,11 @@ import {
 import { RefreshToken } from './refresh-token.entity';
 import { CouponIssue } from '../../coupon/entities/coupon-issue.entity';
 
+export enum UserRole {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('increment')
@@ -20,6 +25,9 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  role: UserRole;
 
   @CreateDateColumn()
   created_at: Date;
