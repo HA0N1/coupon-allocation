@@ -1,1 +1,3 @@
-export class CreateCouponDto {}
+export class CreateCouponDto {
+    
+}
