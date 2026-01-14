@@ -68,6 +68,8 @@ export class UserService {
   async remove(id: number, user: any) {
     const existUser = await this.userRepository.findOne({ where: { id } });
 
+    if (!existUser) throw new NotFoundException('존재하지 않는 유저입니다.');
+
     if (existUser.id !== user.userId) throw new ForbiddenException('본인만 탈퇴할 수 있습니다.');
 
     await this.userRepository.delete(id);
