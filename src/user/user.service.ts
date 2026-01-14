@@ -16,7 +16,7 @@ export class UserService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<String> {
+  async create(createUserDto: CreateUserDto): Promise<string> {
     const { email, password } = createUserDto;
 
     const existUser = await this.findByEmail(email);
