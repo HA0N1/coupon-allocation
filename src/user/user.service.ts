@@ -33,7 +33,12 @@ export class UserService {
   async login(createUserDto: CreateUserDto) {
     const { email, password } = createUserDto;
 
-    const user = await this.findByEmail(email);
+    // 로그인 시에만 password 포함
+    const user = await this.userRepository.findOne({
+      where: { email },
+      select: ['id', 'email', 'password', 'role'],
+    });
+
     if (!user) {
       throw new BadRequestException('이메일 또는 비밀번호가 일치하지 않습니다.');
     }
@@ -59,10 +64,6 @@ export class UserService {
 
   findByEmail(email: string) {
     return this.userRepository.findOne({ where: { email } });
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return this.userRepository.update(id, updateUserDto);
   }
 
   async remove(id: number, user: any) {
