@@ -31,4 +31,9 @@ export class CouponController {
   remove(@Param('id') id: string) {
     return this.couponService.remove(+id);
   }
+
+  @Post(':id/issue')
+  issueCoupon(@Param('id') id: string) {
+    return this.couponService.createIssue(+id);
+  }
 }

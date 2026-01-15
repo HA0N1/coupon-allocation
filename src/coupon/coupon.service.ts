@@ -13,7 +13,14 @@ export class CouponService {
   ) {}
 
   create(createCouponDto: CreateCouponDto) {
-    return this.couponRepository.save(createCouponDto);
+    const coupon = {
+      name: createCouponDto.name,
+      status: 'OPEN',
+      totalQuantity: createCouponDto.totalQuantity,
+      issuedQuantity: +0,
+    };
+
+    return this.couponRepository.save(coupon);
   }
 
   findAll() {
@@ -30,5 +37,9 @@ export class CouponService {
 
   remove(id: number) {
     return this.couponRepository.delete(id);
+  }
+
+  createIssue(id: number) {
+    console.log(id);
   }
 }
