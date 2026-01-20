@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CouponService } from './coupon.service';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
+import { User } from 'src/common/user.decorator';
+import { Auth } from 'src/common/auth.guard';
 
 @Controller('coupon')
 export class CouponController {
@@ -32,8 +34,9 @@ export class CouponController {
     return this.couponService.remove(+id);
   }
 
+  @Auth()
   @Post(':id/issue')
-  issueCoupon(@Param('id') id: string) {
-    return this.couponService.createIssue(+id);
+  issueCoupon(@Param('id') id: string, @User() user): Promise<string> {
+    return this.couponService.createIssue(+id, user);
   }
 }

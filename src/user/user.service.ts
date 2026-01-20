@@ -11,7 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepo: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -23,8 +23,8 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = this.userRepository.create({ email, password: hashedPassword });
-    await this.userRepository.save(user);
+    const user = this.userRepo.create({ email, password: hashedPassword });
+    await this.userRepo.save(user);
 
     return '회원가입이 완료되었습니다.';
   }
@@ -33,7 +33,7 @@ export class UserService {
     const { email, password } = createUserDto;
 
     // 로그인 시에만 password 포함
-    const user = await this.userRepository.findOne({
+    const user = await this.userRepo.findOne({
       where: { email },
       select: ['id', 'email', 'password', 'role'],
     });
@@ -54,25 +54,25 @@ export class UserService {
   }
 
   findAll() {
-    return this.userRepository.find();
+    return this.userRepo.find();
   }
 
   findById(id: number) {
-    return this.userRepository.findOne({ where: { id } });
+    return this.userRepo.findOne({ where: { id } });
   }
 
   findByEmail(email: string) {
-    return this.userRepository.findOne({ where: { email } });
+    return this.userRepo.findOne({ where: { email } });
   }
 
   async remove(id: number, user: any) {
-    const existUser = await this.userRepository.findOne({ where: { id } });
+    const existUser = await this.userRepo.findOne({ where: { id } });
 
     if (!existUser) throw new NotFoundException('존재하지 않는 유저입니다.');
 
     if (existUser.id !== user.userId) throw new ForbiddenException('본인만 탈퇴할 수 있습니다.');
 
-    await this.userRepository.delete(id);
+    await this.userRepo.delete(id);
 
     return '탈퇴가 완료되었습니다.';
   }

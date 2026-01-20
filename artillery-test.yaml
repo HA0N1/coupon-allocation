@@ -1,0 +1,22 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 1
+      arrivalCount: 100
+      name: "100 concurrent users"
+  http:
+    timeout: 30
+  payload:
+    path: "./users.csv"
+    fields:
+      - "userId"
+      - "token"
+    skipHeader: true
+
+scenarios:
+  - name: "Coupon issue concurrent test"
+    flow:
+      - post:
+          url: "/coupon/2/issue"
+          headers:
+            Authorization: "Bearer {{ token }}"
