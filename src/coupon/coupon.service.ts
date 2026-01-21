@@ -51,36 +51,46 @@ export class CouponService {
   async createIssue(id: number, user: any) {
     const existUser = await this.userService.findById(user.userId);
 
-    try {
-      // 트랜잭션 시작
-      // 쿠폰 존재 확인 및 남은 수량 체크
-      // 사용자가 이미 쿠폰을 발급받았는지 확인
-      // coupon 테이블에서 issuedQuantity 증가
-      // coupon issue 테이블에 발급 기록 생성
-      // 트랜잭션 커밋
+    return await this.dataSource.transaction('READ COMMITTED', async (manager) => {
+      const coupon = await manager
+        .createQueryBuilder(Coupon, 'coupon')
+        .where('coupon.id = :id', { id })
+        .setLock('pessimistic_write')
+        .getOne();
 
-      // 트랜잭션 없이 구현
-      const existCoupon = await this.couponRepo.findOne({ where: { id } });
-      if (!existCoupon) throw new BadRequestException('존재하지 않는 쿠폰입니다.');
+      if (!coupon) {
+        throw new BadRequestException('존재하지 않는 쿠폰입니다.');
+      }
 
-      if (existCoupon.status !== 'OPEN' || existCoupon.issued_quantity >= existCoupon.total_quantity) {
+      // 2. 수량 체크
+      if (coupon.status !== 'OPEN' || coupon.issued_quantity >= coupon.total_quantity) {
         throw new BadRequestException('발급 가능한 쿠폰이 없습니다.');
       }
-      const checkExistingIssue = await this.checkExistingIssue(id, existUser.id);
 
-      if (checkExistingIssue) {
+      // 3. 중복 발급 체크
+      const existingIssue = await manager.findOne(CouponIssue, {
+        where: { coupon: { id }, user: { id: existUser.id } },
+      });
+
+      if (existingIssue) {
         throw new BadRequestException('이미 발급받은 쿠폰입니다.');
       }
-      await this.couponRepo.update(id, { issued_quantity: () => 'issued_quantity + 1' });
-      const coupon = this.couponIssueRepo.create({ coupon: { id: existCoupon.id }, user: { id: existUser.id } });
 
-      await this.couponIssueRepo.save(coupon);
+      // 4. 수량 증가
+      await manager.increment(Coupon, { id }, 'issued_quantity', 1);
 
-      return '쿠폰이 발급되었습니다.';
-    } catch (error) {
-      this.logger.error('쿠폰 발급 중 오류 발생', error.stack, 'CouponService');
-      throw error;
-    }
+      // 5. 발급 기록 생성
+      const issue = manager.create(CouponIssue, {
+        coupon: { id },
+        user: { id: existUser.id },
+      });
+      await manager.save(issue);
+
+      return {
+        message: '쿠폰이 발급되었습니다.',
+        issueCode: issue.issue_code,
+      };
+    });
   }
 
   private async checkExistingIssue(couponId: number, userId: number): Promise<boolean> {

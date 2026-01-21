@@ -36,7 +36,7 @@ export class CouponController {
 
   @Auth()
   @Post(':id/issue')
-  issueCoupon(@Param('id') id: string, @User() user): Promise<string> {
+  issueCoupon(@Param('id') id: string, @User() user) {
     return this.couponService.createIssue(+id, user);
   }
 }
