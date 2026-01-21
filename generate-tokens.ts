@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import axios from 'axios';
 
 const BASE_URL = 'http://localhost:3000';
-const USER_COUNT = 100;
+const USER_COUNT = 300;
 
 interface LoginResponse {
   accessToken: string;
@@ -27,7 +27,7 @@ async function generateTokens() {
 
   const csvLines: string[] = [];
 
-  for (let i = 1; i <= 100; i++) {
+  for (let i = 1; i <= USER_COUNT; i++) {
     const token = await loginUser(i);
     if (token) {
       csvLines.push(`${i},${token}`);
@@ -37,7 +37,7 @@ async function generateTokens() {
     }
   }
 
-  fs.writeFileSync('users.csv', csvLines.join('\n'));
+  fs.writeFileSync('users.csv', csvLines.join('\n') + '\n');
   console.log(`\n✅ Generated ${csvLines.length} tokens in users.csv`);
 }
 

@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, LoggerService } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { Coupon } from './entities/coupon.entity';
@@ -16,6 +17,8 @@ export class CouponService {
     private readonly couponIssueRepo: Repository<CouponIssue>,
     private readonly userService: UserService,
     private readonly dataSource: DataSource,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER)
+    private readonly logger: LoggerService,
   ) {}
 
   create(createCouponDto: CreateCouponDto) {
@@ -75,6 +78,7 @@ export class CouponService {
 
       return '쿠폰이 발급되었습니다.';
     } catch (error) {
+      this.logger.error('쿠폰 발급 중 오류 발생', error.stack, 'CouponService');
       throw error;
     }
   }

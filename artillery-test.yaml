@@ -2,8 +2,8 @@ config:
   target: "http://localhost:3000"
   phases:
     - duration: 1
-      arrivalCount: 100
-      name: "100 concurrent users"
+      arrivalCount: 300
+      name: "300 concurrent users"
   http:
     timeout: 30
   payload:
@@ -12,6 +12,7 @@ config:
       - "userId"
       - "token"
     skipHeader: true
+    order: sequence  # 순차적으로 선택
 
 scenarios:
   - name: "Coupon issue concurrent test"
